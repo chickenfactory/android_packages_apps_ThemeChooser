@@ -202,8 +202,7 @@ public class ChooserDetailFragment extends Fragment implements LoaderManager.Loa
         for (Map.Entry<String, CheckBox> entry : mComponentToCheckbox.entrySet()) {
             String component = entry.getKey();
             CheckBox checkbox = entry.getValue();
-            if (checkbox.isEnabled() && checkbox.isChecked()
-                    && !mAppliedComponents.contains(component)) {
+            if (checkbox.isEnabled() && checkbox.isChecked()) {
                 components.add(component);
             }
         }
@@ -333,15 +332,18 @@ public class ChooserDetailFragment extends Fragment implements LoaderManager.Loa
         int legacyIdx = cursor.getColumnIndex(ThemesColumns.IS_LEGACY_THEME);
         int styleIdx = cursor.getColumnIndex(ThemesColumns.STYLE_URI);
         int lockIdx = cursor.getColumnIndex(ThemesColumns.LOCKSCREEN_URI);
+        int defaultIdx = cursor.getColumnIndex(ThemesColumns.IS_DEFAULT_THEME);
 
         boolean isLegacyTheme = cursor.getInt(legacyIdx) == 1;
-        String title = cursor.getString(titleIdx);
+        boolean isDefaultTheme = cursor.getInt(defaultIdx) == 1;
+        String title = ChooserBrowseFragment.DEFAULT.equals(mPkgName)
+                ? getActivity().getString(R.string.holo) : cursor.getString(titleIdx);
         String author = cursor.getString(authorIdx);
         String hsImagePath = isLegacyTheme ? mPkgName : cursor.getString(hsIdx);
         String styleImagePath = cursor.getString(styleIdx);
         String lockWallpaperImagePath = cursor.getString(lockIdx);
 
-        mTitle.setText(title);
+        mTitle.setText(title + (isDefaultTheme ? " " + getString(R.string.default_tag) : ""));
         mAuthor.setText(author);
 
         // Configure checkboxes for all the theme components
@@ -553,19 +555,23 @@ public class ChooserDetailFragment extends Fragment implements LoaderManager.Loa
 
             if (component.equals(ThemesColumns.MODIFIES_LAUNCHER)) {
                 boolean showIcons = mSupportedComponents.contains(ThemesColumns.MODIFIES_ICONS);
-                fragment = WallpaperAndIconPreviewFragment.newInstance(mPreviewImagePath, mPkgName, mIsLegacyTheme, showIcons);
-            } else if(component.equals(ThemesColumns.MODIFIES_OVERLAYS)) {
-                fragment = WallpaperAndIconPreviewFragment.newInstance(mStyleImagePath, mPkgName, mIsLegacyTheme, false);
+                fragment = WallpaperAndIconPreviewFragment.newInstance(mPreviewImagePath, mPkgName,
+                        mIsLegacyTheme, showIcons);
+            } else if (component.equals(ThemesColumns.MODIFIES_OVERLAYS)) {
+                fragment = WallpaperAndIconPreviewFragment.newInstance(mStyleImagePath, mPkgName,
+                        mIsLegacyTheme, false);
             } else if (component.equals(ThemesColumns.MODIFIES_BOOT_ANIM)) {
                 fragment = BootAniPreviewFragment.newInstance(mPkgName);
             } else if (component.equals(ThemesColumns.MODIFIES_FONTS)) {
                 fragment = FontPreviewFragment.newInstance(mPkgName);
             } else if (component.equals(ThemesColumns.MODIFIES_LOCKSCREEN)) {
-                fragment = WallpaperAndIconPreviewFragment.newInstance(mLockScreenImagePath, mPkgName, mIsLegacyTheme, false);
+                fragment = WallpaperAndIconPreviewFragment.newInstance(mLockScreenImagePath,
+                        mPkgName, mIsLegacyTheme, false);
             } else if (component.equals(ThemesColumns.MODIFIES_LAUNCHER)) {
                 throw new UnsupportedOperationException("Not implemented yet!");
             } else if (component.equals(ThemesColumns.MODIFIES_ICONS)) {
-                fragment = WallpaperAndIconPreviewFragment.newInstance(mPreviewImagePath, mPkgName, mIsLegacyTheme, mSupportedComponents.contains(ThemesColumns.MODIFIES_ICONS));
+                fragment = WallpaperAndIconPreviewFragment.newInstance(mPreviewImagePath, mPkgName,
+                        mIsLegacyTheme, mSupportedComponents.contains(ThemesColumns.MODIFIES_ICONS));
             } else if (component.equals(ThemesColumns.MODIFIES_ALARMS)
                     || component.equals(ThemesColumns.MODIFIES_NOTIFICATIONS)
                     || component.equals(ThemesColumns.MODIFIES_RINGTONES)) {
