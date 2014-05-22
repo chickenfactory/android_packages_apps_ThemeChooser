@@ -440,7 +440,7 @@ public class ChooserDetailFragment extends Fragment implements LoaderManager.Loa
             String componentName = entry.getKey();
             CheckBox componentCheckbox = entry.getValue();
 
-            if (appliedComponents.contains(componentName)) {
+            if (mAppliedComponents.contains(componentName)) {
                 if (mSavedCheckboxStates.size() > 0 &&
                         mSavedCheckboxStates.get(componentCheckbox.getId()) != null) {
                     componentCheckbox.setChecked(mSavedCheckboxStates.get(
